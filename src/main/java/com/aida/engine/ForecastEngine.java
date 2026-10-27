@@ -54,10 +54,12 @@ public class ForecastEngine {
         }
         double[] capacity = Capacity.byWeek(team, absences, asOf, MAX_WEEKS);
 
+        // Each run draws from its own split stream, so run r sees the same draws whatever the other runs consume:
+        // less scope or more capacity can then never make any single run finish later.
         SplittableRandom random = new SplittableRandom(seed);
         long[] finish = new long[runs];
         for (int r = 0; r < runs; r++) {
-            finish[r] = simulate(remaining, samples, capacity, random);
+            finish[r] = simulate(remaining, samples, capacity, random.split());
         }
         Arrays.sort(finish);
 
