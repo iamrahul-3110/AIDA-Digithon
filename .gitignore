@@ -19,3 +19,4 @@ tokens.yml
 data/audit.log
 data/alerts.log
 data/alert-state.json
+data/mock-data.json
