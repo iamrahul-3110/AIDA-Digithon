@@ -1,6 +1,6 @@
 # M4 part b (A3) – Token security, MCP endpoint, audit (`m4-e2e` at SYNC S2, Person A)
 
-Branch `a/m4-security`, stacked on `a/m2-adapters` (PR #3).
+Branch `a/m4-security`, based on main after #3 and #7 (`m2-adapters`; ForecastEngine and QualityEngine merged).
 
 **Built**
 - `security.TokenRegistry`: reads `aida.security.tokens-file` (a path, or `classpath:` in tests): a YAML list of
@@ -32,8 +32,8 @@ Branch `a/m4-security`, stacked on `a/m2-adapters` (PR #3).
   with its SHA-256. `tokens.example.yml` with placeholder hashes. `tokens.yml` stays git-ignored.
 
 **Verified**
-- `mvnw.cmd -B verify` → `Tests run: 182, Failures: 0, Errors: 0, Skipped: 0`, `BUILD SUCCESS`, no security errors
-  in the log.
+- `mvnw.cmd -B verify` after rebasing onto main (with Person B's engines) → `Tests run: 215, Failures: 0, Errors: 0,
+  Skipped: 0`, `BUILD SUCCESS`, no security errors in the log.
 - `TokenSecurityTest` (MockMvc): no token → 401 JSON, unknown token or `Basic` scheme → 401, token without `mcp` → 403,
   `/admin/**` needs `admin`, other routes denied, registry matches by hash only (the hash itself is not a token).
 - `McpEndToEndTest` (real Tomcat on port 18081, MCP Java SDK client with a bearer header): valid token →
