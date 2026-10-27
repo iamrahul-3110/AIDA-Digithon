@@ -1,6 +1,6 @@
 # M7 (A5) – Alerts and demo scenarios (`m7-demo` after SYNC S4, Person A)
 
-Branch `a/m7-alerts`, from main at `cb4bf88` (after #12).
+Branch `a/m7-alerts`, rebased onto main at `f729eeb` (after #13, Person B's reports and skill).
 
 **Built**
 - `alerts.AlertService`: for every project in `aida.alerts.projects` (default SHOP, OPS) whose data quality allows a
@@ -15,7 +15,7 @@ Branch `a/m7-alerts`, from main at `cb4bf88` (after #12).
 - `POST /mock/admin/reset` now also clears the alert state, so a demo run after a reset is repeatable.
 - `demo.DemoScenariosTest`: scenarios 1-6 end to end through the MCP SDK client with a bearer token, after a reset,
   on the demo date, real engines. Tagged `demo`; excluded from the default build by the `aida.excluded-test-groups`
-  property and run with `./mvnw verify -Pdemo`. Scenario 5 is skipped (assumption) until `build_report` exists.
+  property and run with `./mvnw verify -Pdemo`. Scenario 5 skips itself (assumption) if `build_report` is missing.
 - Test support: `alerts.DemoClock` pins "today" to the mock's demo date (2026-10-27) for tests that compute dates.
 
 **Verified**
@@ -27,7 +27,7 @@ Branch `a/m7-alerts`, from main at `cb4bf88` (after #12).
   run is quiet; after adding 5 days of leave for Arjun the next run compares with the previous run
   ("fell from 63% to 45%"); `/admin/alerts/run` → 401 without a token, 403 with an mcp-only token, 200 with admin;
   threshold rules (exactly 15 points alerts, 14 does not; ±5 days; missing pByTarget ignored; message text).
-- `mvnw.cmd -B test -Pdemo -Dtest=DemoScenariosTest` on the current data:
+- `mvnw.cmd -B verify -Pdemo` on main with B5 merged (DemoScenariosTest: 6 run, 2 failures, 0 skipped):
 
 | Scenario | Result | Value |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ Branch `a/m7-alerts`, from main at `cb4bf88` (after #12).
 | 2. Arjun leave | passes | p85 later or equal; explain_change lists a leave driver |
 | 3. Drop Gift cards | **fails** | pByTarget 1.0 (want 0.70-0.90) |
 | 4. OPS quality | passes | score < 60, forecastAllowed false, stale items listed |
-| 5. Reports | skipped | build_report not on main yet (B5) |
+| 5. Reports | passes | team, management, client, hq; the client report names no SHOP or OPS team member |
 | 6. Alert run | passes | SHOP 3.2 `confidence_drop` |
 
 **Known gaps – spec conflict for SYNC S4 (STOP rule: needs a decision, not tuning)**
@@ -48,5 +48,4 @@ Branch `a/m7-alerts`, from main at `cb4bf88` (after #12).
 - Ways out, each needing agreement: (a) widen the generated weekly throughput (roughly 1-10 per week) — changes a
   data target; (b) an engine rule with more variance (Person B) — changes an engine rule; (c) relax the scenario
   1 and 3 ranges to what 4-7 per week produces — changes the demo targets.
-- Scenario 5 waits for B5 (ReportEngine, ReportTools). `m7-demo` is tagged when all six pass in CI and the demo tag
-  is no longer excluded.
+- `m7-demo` is tagged when all six pass in CI and the demo tag is no longer excluded.
