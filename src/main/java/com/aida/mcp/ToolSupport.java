@@ -72,6 +72,10 @@ public class ToolSupport {
         meta.put("windowEnd", result.get("windowEnd"));
         result.put("meta", meta);
         auditLog.record(tokenName, tool, args, summary(result));
+        if (!Guardrail.TOOL.equals(tool)) {
+            // The guardrail's own output must never count as a source for later checks.
+            auditLog.remember(tokenName, tool, result);
+        }
         return result;
     }
 
