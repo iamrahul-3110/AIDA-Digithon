@@ -22,7 +22,8 @@
 - SHOP: score **99**, forecastAllowed true (2 of 99 stories without estimate).
 - OPS: score **54**, forecastAllowed false: 6 of 20 active items (30%) stale; 13 of 25 stories (52%) without
   estimate; 12 items bulk-closed in the same minute. Both meet the targets.
-- After `m1-mock` merges, add this as a regular test (`DataGenerator.generate(asOf, 7)`: OPS < 60, SHOP >= 60).
+- Now a regular test, `QualityOnGeneratedDataTest` (`DataGenerator.generate(2026-10-27, 7)`, no HTTP): OPS < 60 with
+  forecastAllowed false and stale items listed; SHOP >= 60 with forecastAllowed true.
 
 **Notes**
 - Zone: the generator turns instants into dates in Asia/Kolkata, the engine in UTC (the contract and fixtures
