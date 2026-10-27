@@ -116,7 +116,7 @@ public class AnalysisTools implements AidaToolSet {
         });
     }
 
-    private static Release requireRelease(ProjectData.Data data, String project, String release) {
+    static Release requireRelease(ProjectData.Data data, String project, String release) {
         return data.releases().stream().filter(r -> r.name().equals(release)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown release '" + release + "' in " + project
                         + "; known releases: " + data.releases().stream().map(Release::name).toList()));
