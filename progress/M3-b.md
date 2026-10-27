@@ -22,7 +22,19 @@
   no throughput -> capped at 104 weeks; short history samples only weeks since the first issue.
 - `mvnw.cmd -B verify` green locally.
 
-**Calibration**
-- Pending: Person A's `m1-mock` is not on main yet. Once it is, run ForecastEngine on
-  `DataGenerator.generate(today, 7)` for SHOP 3.2 and record the numbers here against scenario 1
-  (pByTarget 0.35-0.55, p85 7-14 days after target).
+- Each run draws from its own `SplittableRandom.split()` stream, so run r sees the same draws whatever the other
+  runs consume: less scope or more capacity can never make a single run finish later (the what-if and leave
+  monotonicity checks hold exactly, not just on average).
+
+**Calibration** (2026-10-27, against `origin/a/m1-mock` merged into a scratch worktree, not yet on main)
+- `DataGenerator.generate(2026-10-27, 7)`, SHOP 3.2, target 2026-11-21 (asOf + 25):
+  remaining 18; throughput samples `[4, 7, 7, 5, 4, 4, 6, 5, 5, 4, 6, 5]` (mean 5.2); capacity 0.953;
+  **p50 2026-11-21, p85 2026-11-24, p95 2026-11-25, pByTarget 0.63** -> p85 is target + 3 days.
+- Scenario 1 wants pByTarget 0.35-0.55 and p85 target + 7-14. Both miss on the optimistic side.
+  Scenario 3 (drop SHOP-E7, 13 remaining) gives pByTarget 1.0 against 0.70-0.90.
+- **Which side:** data. The engine is following the spec: ~18 items at ~5.2/week x 0.95 capacity is ~25 days,
+  so p50 lands on the target. The problem is the spread. Weekly throughput of 4-7 averaged over ~4 drawn weeks
+  puts only 4 days between p50 and p95. To get p85 7-14 days past target with p50 near target, the throughput
+  history needs much more week-to-week variance (some 0-2 weeks, some 8+), or more remaining items or less
+  capacity in the window. With 4-7 per week, scenario 1's ranges may not be reachable at all; settle this at S4.
+  Engine rules unchanged.
