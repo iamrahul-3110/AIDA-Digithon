@@ -1,0 +1,21 @@
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+*.swp
+.DS_Store
+
+# Secrets and runtime state (never commit)
+tokens.yml
+.env
+data/audit.log
+data/alerts.log
+data/alert-state.json
