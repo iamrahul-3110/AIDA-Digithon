@@ -18,5 +18,12 @@
   short history each blocking the forecast, and the fixtures' one missing estimate.
 - `mvnw.cmd -B verify` green locally.
 
-**Pending**
-- On `DataGenerator` data: OPS below 60 and SHOP 60 or above. Runs once Person A's `m1-mock` is on main.
+**On DataGenerator data** (2026-10-27, `origin/a/m1-mock` in a scratch worktree, seed 7)
+- SHOP: score **99**, forecastAllowed true (2 of 99 stories without estimate).
+- OPS: score **54**, forecastAllowed false: 6 of 20 active items (30%) stale; 13 of 25 stories (52%) without
+  estimate; 12 items bulk-closed in the same minute. Both meet the targets.
+- After `m1-mock` merges, add this as a regular test (`DataGenerator.generate(asOf, 7)`: OPS < 60, SHOP >= 60).
+
+**Notes**
+- Zone: the generator turns instants into dates in Asia/Kolkata, the engine in UTC (the contract and fixtures
+  use UTC instants). They only disagree for status changes between 18:30 and 24:00 UTC; worth aligning at S4.
