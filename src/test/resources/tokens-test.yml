@@ -1,0 +1,13 @@
+# Test-only tokens; the plain values are in com.aida.security.TestTokens. Never use these anywhere else.
+- name: test-full
+  sha256: 6decfc17ad896ea6fea15c90f2cfb7c0ef5b4bf7c3e6b130d9eb7fc7750d5c2f
+  projects: [SHOP, OPS]
+  scopes: [mcp, admin]
+- name: test-ops-only
+  sha256: 18fecf160b6f78ef369b97e2c3ff8ded750ee06bf9b2b20d4d9bee288553df38
+  projects: [OPS]
+  scopes: [mcp]
+- name: test-admin-only
+  sha256: e211d8dc92775d53e4be89b8f2b0481a4bf64016e50e74113a33ea897d0e05ea
+  projects: [SHOP]
+  scopes: [admin]
