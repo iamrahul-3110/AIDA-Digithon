@@ -1,0 +1,20 @@
+# Copy to tokens.yml (git-ignored) or point AIDA_TOKENS_FILE at your own file.
+# Each entry holds only the SHA-256 hash of a token; create entries with scripts/new-token.sh.
+#
+#   projects: the project keys the token may read (SHOP, OPS)
+#   scopes:   mcp   -> may call /mcp (the Claude tools)
+#             admin -> may call /admin/** (alerts run-now)
+#
+# The hashes below are placeholders that match no token.
+- name: lana-claude-code
+  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  projects: [SHOP, OPS]
+  scopes: [mcp]
+- name: ops-lead
+  sha256: 1111111111111111111111111111111111111111111111111111111111111111
+  projects: [OPS]
+  scopes: [mcp]
+- name: alerts-admin
+  sha256: 2222222222222222222222222222222222222222222222222222222222222222
+  projects: [SHOP, OPS]
+  scopes: [admin]

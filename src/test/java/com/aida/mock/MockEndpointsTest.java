@@ -208,7 +208,7 @@ class MockEndpointsTest {
 
     @Test
     void routesOutsideTheMockAreDenied() throws Exception {
-        mvc.perform(get("/mcp")).andExpect(status().isForbidden());
+        mvc.perform(get("/mcp")).andExpect(status().isUnauthorized());
         mvc.perform(get("/actuator/health")).andExpect(status().isOk());
     }
 }
