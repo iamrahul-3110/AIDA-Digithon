@@ -80,6 +80,16 @@ public class ForecastEngine {
                 capacityFactor, runs, seed);
     }
 
+    /** First day (a Monday) of the 12-week throughput window a forecast at asOf samples. */
+    public static LocalDate windowStart(LocalDate asOf) {
+        return EngineDates.windowStart(asOf);
+    }
+
+    /** Last day (a Sunday) of the 12-week throughput window a forecast at asOf samples. */
+    public static LocalDate windowEnd(LocalDate asOf) {
+        return EngineDates.windowEnd(asOf);
+    }
+
     /**
      * Items moved to Done per ISO week over the 12 weeks before asOf's week, oldest first. Weeks that ended before
      * the earliest issue was created are not history and are left out.
