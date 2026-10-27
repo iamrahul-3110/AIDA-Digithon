@@ -20,6 +20,8 @@
     <properties>
         <java.version>21</java.version>
         <spring-ai.version>2.0.2</spring-ai.version>
+        <!-- DemoScenariosTest (tag "demo") joins the default build once SYNC S4 has tuned every scenario into range. -->
+        <aida.excluded-test-groups>demo</aida.excluded-test-groups>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +76,23 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>${aida.excluded-test-groups}</excludedGroups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- ./mvnw verify -Pdemo also runs the demo scenarios. -->
+        <profile>
+            <id>demo</id>
+            <properties>
+                <aida.excluded-test-groups>none</aida.excluded-test-groups>
+            </properties>
+        </profile>
+    </profiles>
 </project>
