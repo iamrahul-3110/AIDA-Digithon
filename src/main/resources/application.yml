@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: aida
+  profiles:
+    # The MVP serves mock Jira and leave-calendar endpoints from the same app.
+    default: mock
+  ai:
+    mcp:
+      server:
+        name: aida
+        version: 0.1.0
+        type: SYNC
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+
+aida:
+  jira:
+    base-url: http://localhost:8080/mock/jira
+  leave:
+    base-url: http://localhost:8080/mock
+  security:
+    tokens-file: ${AIDA_TOKENS_FILE:./tokens.yml}
+  data-dir: ./data
+  alerts:
+    cron: "0 0 2 * * *"
+    webhook: ${AIDA_ALERT_WEBHOOK:}

@@ -1,0 +1,6 @@
+[
+  {"id": "lv-1", "person": "Arjun", "country": "IN", "start": "2026-11-16", "end": "2026-11-20", "type": "leave"},
+  {"id": "lv-2", "person": "Linh", "country": "VN", "start": "2026-11-02", "end": "2026-11-03", "type": "leave"},
+  {"id": "hol-kr-2026-12-25", "person": null, "country": "KR", "start": "2026-12-25", "end": "2026-12-25", "type": "holiday"},
+  {"id": "hol-vn-2027-01-01", "person": null, "country": "VN", "start": "2027-01-01", "end": "2027-01-01", "type": "holiday"}
+]
