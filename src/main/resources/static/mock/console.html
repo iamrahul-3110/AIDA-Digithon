@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIDA leave console</title>
+  <style>
+    :root { color-scheme: light dark; --line: #8884; --accent: #2f6fde; }
+    body { font: 15px/1.45 system-ui, sans-serif; max-width: 920px; margin: 24px auto; padding: 0 16px; }
+    h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    p.sub { margin-top: 0; opacity: .7; }
+    section { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+    form { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+    label { display: flex; flex-direction: column; font-size: .85rem; gap: 2px; }
+    input, select, button { font: inherit; padding: 4px 8px; }
+    button { cursor: pointer; }
+    button.primary { background: var(--accent); color: #fff; border: 0; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+    .holiday { opacity: .7; }
+    #status { min-height: 1.4em; }
+    .error { color: #c33; }
+  </style>
+</head>
+<body>
+  <h1>AIDA leave console</h1>
+  <p class="sub">Mock team calendar for the demo. Changes show up in AIDA's next forecast.</p>
+
+  <section>
+    <h2>Add leave</h2>
+    <form id="add">
+      <label>Person <select id="person" required></select></label>
+      <label>Start <input type="date" id="start" required></label>
+      <label>End (inclusive) <input type="date" id="end" required></label>
+      <button class="primary" type="submit">Add leave</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Calendar</h2>
+    <form id="range">
+      <label>From <input type="date" id="from" required></label>
+      <label>To <input type="date" id="to" required></label>
+      <button type="submit">Show</button>
+      <button type="button" id="reset" title="Regenerate all demo data">Reset demo data</button>
+    </form>
+    <p id="status"></p>
+    <table>
+      <thead><tr><th>Id</th><th>Who</th><th>Country</th><th>Start</th><th>End</th><th>Type</th><th></th></tr></thead>
+      <tbody id="events"></tbody>
+    </table>
+  </section>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const iso = d => d.toISOString().slice(0, 10);
+    const status = (msg, err) => { $('status').textContent = msg; $('status').className = err ? 'error' : ''; };
+
+    async function call(method, url, body) {
+      const res = await fetch(url, {
+        method, headers: body ? { 'Content-Type': 'application/json' } : {},
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!res.ok) throw new Error(`${res.status} ${(await res.text()) || res.statusText}`);
+      return res.status === 204 ? null : res.json();
+    }
+
+    async function loadTeam() {
+      const teams = await Promise.all(['SHOP', 'OPS'].map(p => call('GET', `/mock/team?project=${p}`)
+        .then(people => people.map(x => ({ ...x, project: p })))));
+      $('person').innerHTML = teams.flat()
+        .map(p => `<option value="${p.name}">${p.name} (${p.project}, ${p.country})</option>`).join('');
+    }
+
+    async function loadEvents() {
+      const { events } = await call('GET', `/mock/calendar/events?from=${$('from').value}&to=${$('to').value}`);
+      $('events').innerHTML = events.map(e => `
+        <tr class="${e.type}">
+          <td>${e.id}</td><td>${e.person ?? 'Public holiday'}</td><td>${e.country}</td>
+          <td>${e.start}</td><td>${e.end}</td><td>${e.type}</td>
+          <td>${e.type === 'leave' ? `<button data-id="${e.id}">Delete</button>` : ''}</td>
+        </tr>`).join('');
+    }
+
+    $('add').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      try {
+        const leave = await call('POST', '/mock/calendar/events',
+          { person: $('person').value, start: $('start').value, end: $('end').value });
+        status(`Added ${leave.id}: ${leave.person}, ${leave.start} to ${leave.end}.`);
+        await loadEvents();
+      } catch (e) { status(e.message, true); }
+    });
+
+    $('range').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      try { await loadEvents(); status(''); } catch (e) { status(e.message, true); }
+    });
+
+    $('events').addEventListener('click', async ev => {
+      const id = ev.target.dataset.id;
+      if (!id) return;
+      try { await call('DELETE', `/mock/calendar/events/${id}`); status(`Deleted ${id}.`); await loadEvents(); }
+      catch (e) { status(e.message, true); }
+    });
+
+    $('reset').addEventListener('click', async () => {
+      if (!confirm('Regenerate all demo data? Leaves added here are removed.')) return;
+      try {
+        const r = await call('POST', '/mock/admin/reset');
+        status(`Reset: ${r.issues} issues, ${r.absences} absences, as of ${r.asOf}.`);
+        await loadEvents();
+      } catch (e) { status(e.message, true); }
+    });
+
+    const today = new Date();
+    $('from').value = iso(new Date(today.getTime() - 14 * 864e5));
+    $('to').value = iso(new Date(today.getTime() + 90 * 864e5));
+    $('start').value = $('end').value = iso(today);
+    loadTeam().then(loadEvents).catch(e => status(e.message, true));
+  </script>
+</body>
+</html>
