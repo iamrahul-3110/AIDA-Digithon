@@ -1,6 +1,6 @@
 # M2 part a (A2) – Adapters (`m2-adapters` once B1 Snapshots is also merged, Person A)
 
-Branch `a/m2-adapters`, stacked on `a/m1-mock` (PR #2).
+Branch `a/m2-adapters`, based on main after #2 (`m1-mock`).
 
 **Built**
 - `HttpJiraSource` (RestClient, `aida.jira.base-url`):
