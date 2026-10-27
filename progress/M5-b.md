@@ -30,12 +30,16 @@
 - `WhatIfEngineTest`: no change = plain forecast; drop by key or name; dropping an epic never lowers pByTarget
   (25 random inputs); adding people is faster, removing slower; inputs unchanged.
 - `RiskEngineTest`: reasons, sides, ordering, bottleneck, fixture SHOP-106 client wait of 8 days.
-- `AnalysisToolsTest` (`@SpringBootTest`, `ProjectData` mocked): tools registered; results and meta for all three.
+- `AnalysisToolsTest` (`@SpringBootTest`, `ProjectData` mocked, through Person A's real `ToolSupport`, calls run
+  as a `TestTokens` authentication): tools registered; results and meta for all three; clear errors for an unknown
+  release and bad dates; a token covering only OPS gets "Access denied: token 'test-ops-only' cannot read project
+  SHOP" from all three tools and no data is loaded; no token -> "Access denied: no token".
 - `mvnw.cmd -B verify` green locally.
 
 **Known gaps / notes**
-- Waits for `m4-e2e` before merging (rebase onto the real ToolSupport). Still to add then: the access-denied tool
-  test with a token lacking SHOP, using Person A's security test helpers.
+- Rebased onto main with Person A's M4 security (#9): AnalysisTools follows ForecastTools (injected `Clock`,
+  upper-cased project key, null arguments left out of the audit line). `mvnw.cmd -B verify`: 236 tests, all green.
+  Merge after `m4-e2e` is tagged.
 - The leave driver can only compare the absences visible now across the two forecast windows; the engine has no
   history of when a leave was entered. It is listed whenever the toDate window holds leave, even with 0 impact, so
   scenario 2 shows it. Check its impact during S4.
