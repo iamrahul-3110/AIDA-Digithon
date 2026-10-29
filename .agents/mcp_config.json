@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "aida": {
+      "serverUrl": "http://localhost:8080/sse?token=gemini-aida-test-token-2026"
+    }
+  }
+}

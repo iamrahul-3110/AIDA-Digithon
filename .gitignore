@@ -1,0 +1,24 @@
+﻿# Java / Maven
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# AIDA sensitive files
+tokens.yml
+.env
+data/audit.log
+data/alerts.log
+data/alert-state.json
+data/*.log
+data/*.json
+
+# OS
+.DS_Store
+Thumbs.db

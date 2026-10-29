@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "aida": {
+      "type": "sse",
+      "url": "http://localhost:8080/sse",
+      "headers": {
+        "Authorization": "Bearer gemini-aida-test-token-2026"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  tomcat:
+    connection-timeout: 60000
+    threads:
+      max: 200
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: aida
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: false
+    default-property-inclusion: non_null
+  ai:
+    mcp:
+      server:
+        name: aida
+        version: 0.1.0
+        type: SYNC
+
+aida:
+  jira:
+    base-url: http://localhost:8080/mock/jira
+  leave:
+    base-url: http://localhost:8080/mock
+  security:
+    tokens-file: ${AIDA_TOKENS_FILE:./tokens.yml}
+  data-dir: ./data
+  alerts:
+    cron: "0 0 2 * * *"
+    webhook: ${AIDA_ALERT_WEBHOOK:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIDA – AI Delivery Analyst Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-surface: rgba(18, 24, 38, 0.75);
+      --bg-surface-elevated: rgba(30, 41, 59, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --brand-cyan: #38bdf8;
+      --brand-blue: #3b82f6;
+      --brand-purple: #8b5cf6;
+      --brand-emerald: #10b981;
+      --brand-rose: #f43f5e;
+      --brand-amber: #f59e0b;
+      --gradient-brand: linear-gradient(135deg, #38bdf8, #8b5cf6);
+      --glow-cyan: 0 0 25px rgba(56, 189, 248, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 45%);
+    }
+
+    /* Top Navigation Header */
+    header {
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--gradient-brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--brand-emerald);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--brand-emerald);
+      box-shadow: 0 0 10px var(--brand-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .nav-link {
+      color: var(--brand-cyan);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .nav-link:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      height: calc(100vh - 65px);
+    }
+
+    /* Chat Messages Box */
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      scroll-behavior: smooth;
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+
+    .message {
+      display: flex;
+      gap: 0.85rem;
+      max-width: 85%;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .avatar.aida {
+      background: var(--gradient-brand);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+    }
+
+    .avatar.user {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    .bubble {
+      background: var(--bg-surface-elevated);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      border-color: rgba(96, 165, 250, 0.3);
+      border-bottom-right-radius: 3px;
+    }
+
+    .message.aida .bubble {
+      border-bottom-left-radius: 3px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Badges & Metrics inside Bot Bubble */
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--brand-cyan);
+      margin-bottom: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metrics-card {
+      margin-top: 0.85rem;
+      background: rgba(10, 14, 23, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.65rem;
+      font-size: 0.8rem;
+    }
+
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .metric-value.confidence-high { color: var(--brand-emerald); }
+    .metric-value.confidence-mid { color: var(--brand-amber); }
+    .metric-value.confidence-low { color: var(--brand-rose); }
+
+    /* Suggested Prompts Chips */
+    .chips-bar {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding: 0.5rem 0 0.85rem 0;
+      scrollbar-width: none;
+    }
+    .chips-bar::-webkit-scrollbar { display: none; }
+
+    .chip-btn {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border-subtle);
+      color: #cbd5e1;
+      padding: 0.45rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--brand-cyan);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Input Footer */
+    .input-wrapper {
+      background: var(--bg-surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 0.4rem 0.5rem 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--brand-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    #chat-input::placeholder {
+      color: #64748b;
+    }
+
+    #send-btn {
+      background: var(--gradient-brand);
+      color: #fff;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    #send-btn:hover {
+      opacity: 0.92;
+      transform: scale(1.02);
+    }
+    #send-btn:active {
+      transform: scale(0.98);
+    }
+    #send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Typing indicator */
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      padding: 0.4rem 0.2rem;
+    }
+    .typing-dots span {
+      width: 6px;
+      height: 6px;
+      background: var(--brand-cyan);
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out both;
+    }
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <div class="brand-title">AIDA Delivery Analyst</div>
+        <div class="brand-sub">Spring Boot MCP Forecast Engine &middot; Real-time AI Assistant</div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>AIDA Engine Online</span>
+      </div>
+      <a href="/mock/console.html" target="_blank" class="nav-link">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        Leave Console
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="chat-box" id="chat-messages">
+      <!-- Welcome message -->
+      <div class="message aida">
+        <div class="avatar aida">AI</div>
+        <div class="bubble">
+          <div class="tool-badge">Connected via Spring Boot MCP Engine</div>
+          <p>Hello! I am <strong>AIDA</strong>, your AI Delivery Analyst.</p>
+          <p style="margin-top: 0.4rem; color: var(--text-muted);">
+            I calculate deterministic Monte Carlo forecast simulations, explain schedule drift, simulate what-if scenarios, audit data hygiene, and flag risks.
+          </p>
+          <div class="metrics-card">
+            <div class="metric-item">
+              <span class="metric-label">Tracked Projects</span>
+              <span class="metric-value">SHOP, OPS</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Active Releases</span>
+              <span class="metric-value">3.1, 3.2</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Security</span>
+              <span class="metric-value" style="color: var(--brand-emerald);">Bearer Token</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggested Quick Prompts -->
+    <div class="chips-bar">
+      <button class="chip-btn" onclick="sendQuick('Will SHOP 3.2 ship by its target date?')">🎯 Will SHOP 3.2 ship on time?</button>
+      <button class="chip-btn" onclick="sendQuick('What if we drop the Gift cards epic for SHOP 3.2?')">⚡ What if we drop Gift cards?</button>
+      <button class="chip-btn" onclick="sendQuick('Check data quality for project OPS')">🔍 Check OPS data quality</button>
+      <button class="chip-btn" onclick="sendQuick('What are the active bottlenecks and risks for SHOP 3.2?')">⚠️ Show risks & bottlenecks</button>
+      <button class="chip-btn" onclick="sendQuick('Build a status report for SHOP 3.2 for the client')">📄 Generate client status report</button>
+      <button class="chip-btn" onclick="sendQuick('Explain schedule shift and delivery drivers for SHOP 3.2')">📊 Explain schedule drivers</button>
+    </div>
+
+    <!-- Input Footer -->
+    <form class="input-wrapper" id="chat-form" onsubmit="handleSubmit(event)">
+      <input 
+        id="chat-input" 
+        type="text" 
+        placeholder="Ask a delivery question (e.g. Will SHOP 3.2 ship on time?)" 
+        autocomplete="off"
+      />
+      <button type="submit" id="send-btn">
+        <span>Send</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </form>
+  </main>
+
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function appendUserMessage(text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message user';
+      msgDiv.innerHTML = `
+        <div class="avatar user">You</div>
+        <div class="bubble">${escapeHtml(text)}</div>
+      `;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendAidaTyping() {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message aida';
+      msgDiv.id = 'typing-indicator';
+      msgDiv.innerHTML = `
+        <div class="avatar aida">AI</div>
+        <div class="bubble">
+          <div class="typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      `;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeAidaTyping() {
+      const typing = document.getElementById('typing-indicator');
+      if (typing) typing.remove();
+    }
+
+    function appendAidaResponse(data) {
+      removeAidaTyping();
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message aida';
+
+      let metricsHtml = '';
+      if (data.metrics && Object.keys(data.metrics).length > 0) {
+        let items = '';
+        for (const [key, val] of Object.entries(data.metrics)) {
+          if (val === null || val === undefined) continue;
+          let colorClass = '';
+          if (key.includes('Confidence') || key === 'pByTarget' || key === 'score') {
+            const num = Number(val);
+            colorClass = num >= 75 ? 'confidence-high' : num >= 50 ? 'confidence-mid' : 'confidence-low';
+          }
+          items += `
+            <div class="metric-item">
+              <span class="metric-label">${formatLabel(key)}</span>
+              <span class="metric-value ${colorClass}">${val}${key.includes('Confidence') || key === 'pByTarget' ? '%' : ''}</span>
+            </div>
+          `;
+        }
+        if (items) {
+          metricsHtml = `<div class="metrics-card">${items}</div>`;
+        }
+      }
+
+      const formattedAnswer = renderMarkdown(data.answer);
+
+      msgDiv.innerHTML = `
+        <div class="avatar aida">AI</div>
+        <div class="bubble">
+          <div class="tool-badge">MCP Tool: ${data.toolCalled || 'AIDA Engine'}</div>
+          <div>${formattedAnswer}</div>
+          ${metricsHtml}
+        </div>
+      `;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendPrompt(text) {
+      if (!text || !text.trim()) return;
+      appendUserMessage(text);
+      chatInput.value = '';
+      sendBtn.disabled = true;
+      appendAidaTyping();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: text })
+        });
+
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        }
+
+        const data = await response.json();
+        appendAidaResponse(data);
+      } catch (err) {
+        removeAidaTyping();
+        const errDiv = document.createElement('div');
+        errDiv.className = 'message aida';
+        errDiv.innerHTML = `
+          <div class="avatar aida" style="background:#ef4444;">!</div>
+          <div class="bubble" style="border-color: rgba(239, 68, 68, 0.4);">
+            <div style="color: #f87171; font-weight: 600;">Error communicating with AIDA Engine</div>
+            <div style="font-size: 0.85rem; color: #cbd5e1; margin-top: 0.3rem;">${escapeHtml(err.message)}</div>
+          </div>
+        `;
+        chatMessages.appendChild(errDiv);
+      } finally {
+        sendBtn.disabled = false;
+        chatInput.focus();
+      }
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      sendPrompt(chatInput.value);
+    }
+
+    function sendQuick(promptText) {
+      chatInput.value = promptText;
+      sendPrompt(promptText);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatLabel(key) {
+      return key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/_/g, ' ')
+        .trim();
+    }
+
+    function renderMarkdown(text) {
+      if (!text) return '';
+      let html = escapeHtml(text);
+      // Bold
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Bullet points
+      html = html.replace(/\n- (.*?)(?=\n|$)/g, '<li style="margin-left: 1.25rem; margin-top: 0.25rem;">$1</li>');
+      // Line breaks
+      html = html.replace(/\n/g, '<br>');
+      return html;
+    }
+  </script>
+</body>
+</html>

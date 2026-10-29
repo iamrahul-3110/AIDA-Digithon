@@ -1,0 +1,11 @@
+﻿{
+  "mcpServers": {
+    "aida": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:8080/mcp", "--header", "Authorization:${AUTH_HEADER}"],
+      "env": {
+        "AUTH_HEADER": "Bearer <your-token-here>"
+      }
+    }
+  }
+}

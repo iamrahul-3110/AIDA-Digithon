@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIDA – Leave Console</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
+  h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; color: #38bdf8; }
+  p.sub { color: #94a3b8; margin-bottom: 2rem; }
+  .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+  h2 { font-size: 1rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+  .form-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.875rem; color: #94a3b8; }
+  input { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem 0.75rem; color: #e2e8f0; font-size: 0.875rem; outline: none; }
+  input:focus { border-color: #38bdf8; }
+  button { background: #0ea5e9; color: #fff; border: none; border-radius: 6px; padding: 0.6rem 1.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  button:hover { background: #0284c7; }
+  button.danger { background: #ef4444; }
+  button.danger:hover { background: #dc2626; }
+  button.secondary { background: #334155; }
+  button.secondary:hover { background: #475569; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  th { text-align: left; padding: 0.5rem 0.75rem; color: #64748b; border-bottom: 1px solid #334155; font-weight: 600; }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-leave { background: #1d4ed8; color: #bfdbfe; }
+  .badge-holiday { background: #065f46; color: #a7f3d0; }
+  #msg { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+  #msg.ok { background: #064e3b; color: #a7f3d0; display: block; }
+  #msg.err { background: #7f1d1d; color: #fca5a5; display: block; }
+</style>
+</head>
+<body>
+<h1>AIDA Leave Console</h1>
+<p class="sub">Manage team leave and view absences for the mock calendar.</p>
+
+<div id="msg"></div>
+
+<div class="card">
+  <h2>Add Leave</h2>
+  <div class="form-row">
+    <label>Person <input id="person" placeholder="Arjun" value="Arjun"></label>
+    <label>Start <input id="start" type="date"></label>
+    <label>End <input id="end" type="date"></label>
+    <label style="justify-content:flex-end"><span>&nbsp;</span><button onclick="addLeave()">Add Leave</button></label>
+  </div>
+</div>
+
+<div class="card">
+  <h2>View Absences <span style="margin-left:1rem">
+    <label style="display:inline-flex;gap:0.5rem;align-items:center;font-size:0.8rem;color:#94a3b8">
+      From <input id="fromDate" type="date" style="width:140px">
+      To <input id="toDate" type="date" style="width:140px">
+    </label>
+    <button class="secondary" onclick="loadAbsences()" style="margin-left:0.5rem">Refresh</button>
+  </span></h2>
+  <table>
+    <thead><tr><th>ID</th><th>Person</th><th>Country</th><th>Start</th><th>End</th><th>Type</th><th>Action</th></tr></thead>
+    <tbody id="absences-body"><tr><td colspan="7" style="color:#64748b">Loading…</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card" style="display:flex;gap:1rem;align-items:center">
+  <button class="danger" onclick="reset()">Reset Demo Data</button>
+  <span style="color:#64748b;font-size:0.8rem">Regenerates all mock issues, team and absences from scratch.</span>
+</div>
+
+<script>
+const today = new Date().toISOString().slice(0,10);
+const in3m = new Date(Date.now()+90*86400000).toISOString().slice(0,10);
+document.getElementById('start').value = today;
+document.getElementById('end').value = today;
+document.getElementById('fromDate').value = today;
+document.getElementById('toDate').value = in3m;
+
+function msg(text, ok) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = ok ? 'ok' : 'err';
+  setTimeout(() => el.className = '', 4000);
+}
+
+async function loadAbsences() {
+  const from = document.getElementById('fromDate').value;
+  const to = document.getElementById('toDate').value;
+  const res = await fetch(`/mock/calendar/events?from=${from}&to=${to}`);
+  const data = await res.json();
+  const tbody = document.getElementById('absences-body');
+  if (!data.events || data.events.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:#64748b">No absences in this range.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.events.map(e => `
+    <tr>
+      <td style="color:#64748b;font-size:0.75rem">${e.id}</td>
+      <td>${e.person || '<em style="color:#64748b">holiday</em>'}</td>
+      <td>${e.country || ''}</td>
+      <td>${e.start}</td>
+      <td>${e.end}</td>
+      <td><span class="badge badge-${e.type}">${e.type}</span></td>
+      <td>${e.type==='leave' ? `<button class="danger" style="padding:0.3rem 0.6rem;font-size:0.75rem" onclick="deleteLeave('${e.id}')">Delete</button>` : ''}</td>
+    </tr>`).join('');
+}
+
+async function addLeave() {
+  const body = { person: document.getElementById('person').value, start: document.getElementById('start').value, end: document.getElementById('end').value };
+  if (!body.person || !body.start || !body.end) { msg('Fill in all fields', false); return; }
+  const res = await fetch('/mock/calendar/events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (res.ok) { msg('Leave added', true); loadAbsences(); }
+  else msg('Failed to add leave', false);
+}
+
+async function deleteLeave(id) {
+  const res = await fetch(`/mock/calendar/events/${id}`, { method:'DELETE' });
+  if (res.ok) { msg('Leave deleted', true); loadAbsences(); }
+  else msg('Failed to delete', false);
+}
+
+async function reset() {
+  if (!confirm('Reset all demo data?')) return;
+  const res = await fetch('/mock/admin/reset', { method:'POST' });
+  if (res.ok) { msg('Demo data reset', true); loadAbsences(); }
+  else msg('Reset failed', false);
+}
+
+loadAbsences();
+</script>
+</body>
+</html>

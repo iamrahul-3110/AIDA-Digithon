@@ -1,0 +1,11 @@
+﻿{
+  "mcpServers": {
+    "aida": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer ${AIDA_TOKEN}"
+      }
+    }
+  }
+}
